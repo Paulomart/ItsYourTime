@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.paulomart</groupId>
+  <artifactId>ItsYourTime2</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>ItsYourTime</name>
+  <repositories>
+       <!-- Bukkit can be found at the following repository -->
+     <repository>
+        <id>bukkit-repo</id>
+        <url>http://repo.bukkit.org/content/groups/public/</url>
+     </repository>
+  </repositories>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.projectlombok</groupId>
+  		<artifactId>lombok</artifactId>
+  		<version>1.12.2</version>
+  	</dependency>
+  	<dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <!-- Bukkit API Version, change if necessary -->
+            <version>1.7.2-R0.2</version>
+    </dependency>
+  </dependencies>
+</project>
