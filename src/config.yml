@@ -1,0 +1,8 @@
+mysql:
+  database: stats
+  host: MCNation.de
+  user: ''
+  password: ''
+  port: 3306
+  tablename: playerstats
+movetimes:

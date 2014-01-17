@@ -59,18 +59,11 @@ public class ItsYourTime extends JavaPlugin{
 		//TODO FIX
 		Group storageGroup = findNextGroup(playerName);
 		final PexGroup nextGroup = storageGroup.getGroup();
-		if (nextGroup == null){
-			return;
-		}
+
 		long moveTime = storageGroup.getMoveTime() - mysqlConnector.getPlayTimeReal(playerName);
 		log.info(String.valueOf(mysqlConnector.getPlayTimeReal(playerName)));
 		log.info(playerName +" in "+ moveTime + " to "+ nextGroup.getName());
-		
-		if (gpex.getPexMysql().getGroup(playerName).equals(nextGroup)){
-			//Dont move if Group is same.
-			return;
-		}
-		
+
 		
 		if (moveTime <= 0){
 			gpex.getPexMysql().setGroup(playerName, nextGroup);
@@ -134,7 +127,8 @@ public class ItsYourTime extends JavaPlugin{
 		}
 		
 		
-		
+		prt(sGroup.getGroup());
+		prt(sGroup.getMoveTime());
 		
 		return sGroup;
 	/*	
