@@ -1,5 +1,8 @@
 package me.Paulomart.ItsYourTime;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -90,11 +93,51 @@ public class ItsYourTime extends JavaPlugin{
 	}
 	
 	public Group findNextGroup(String player){
-		PexGroup group = null;
 		long playedTime = mysqlConnector.getPlayTimeReal(player);
 		
 		//TODO FIX THIS SHIT HERE. DOSENT WORK AT ALL.
-		long last = -1;
+		
+		List<Long> keys = new ArrayList<Long>(timeConfig.getMoveTimes().keySet());
+		
+		Long[] sorted = new Long[keys.size()];
+		
+		int i = 0;
+		for (Long key : keys){
+			sorted[i] = key;
+			i++;
+		}
+		
+		Arrays.sort(sorted);
+		
+		Group sGroup = null;
+		//SELCET 1 WHERE time is NEARST TO playedtime
+		
+		//1 2 3 4 5 6 7 8
+		
+		//3
+		int last = 0;
+		for (int j = 0; j < sorted.length; j++) {
+			Long time = sorted[j];
+			if (time >= playedTime){	
+				sGroup = new Group(timeConfig.getMoveTimes().get(time), time);
+			}
+			last = j;
+		}
+		
+		if (sGroup == null){
+			if (last >= sorted.length){
+				last = sorted.length-1;
+			}
+			
+			long time = sorted[last+1];
+			sGroup = new Group(timeConfig.getMoveTimes().get(time), time);
+		}
+		
+		
+		
+		
+		return sGroup;
+	/*	
 		for (Long time : timeConfig.getMoveTimes().keySet()){
 			prt(time);
 			prt(playedTime);
@@ -102,7 +145,7 @@ public class ItsYourTime extends JavaPlugin{
 			if (time <= playedTime){
 				prt("1. True");
 				//gorup is ok.
-				if (time < last || last == -1){
+				if (time > last || last == -1){
 					prt("2. True");
 					last = time;
 					group = timeConfig.getMoveTimes().get(time);
@@ -124,7 +167,7 @@ public class ItsYourTime extends JavaPlugin{
 			}
 		}
 */
-		return new Group(group, last);
+	//	return new Group(group, last);
 	}
 	
 		
