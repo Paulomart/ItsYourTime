@@ -1,11 +1,11 @@
 package me.Paulomart.ItsYourTime;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import lombok.Getter;
@@ -24,16 +24,6 @@ public class ItsYourTime extends JavaPlugin{
 	@Getter
 	private TimeConfig timeConfig;
 	
-	/*
-	 * Todo
-	 * 
-	 * non Promote perx
-	 * handle reload.
-	 * 
-	 * 
-	 */
-	
-	
 	public void onEnable(){
 		gpex = (GPex) Bukkit.getServer().getPluginManager().getPlugin("GPex");
 		if (gpex == null){
@@ -48,26 +38,37 @@ public class ItsYourTime extends JavaPlugin{
 		log.info("Hooking into GPex");
 		mysqlConnector = new MysqlConnector(this);
 		eventListener = new EventListener(this);
+		for (Player player : Bukkit.getServer().getOnlinePlayers()){
+			mysqlConnector.join(player.getName());
+		}
+		
 	}
 	
 	public void onDisable(){
+		for (Player player : Bukkit.getServer().getOnlinePlayers()){
+			mysqlConnector.leave(player.getName());
+		}
 		mysqlConnector.closeStats();
 		timeConfig.save();
 	}
 	
-	public void scheduleMove(final String playerName){
-		//TODO FIX
+	public void scheduleMove(final Player player){
+		if (player.hasPermission("ItsYourTime.ItsYourTime")){
+			return;
+		}
+		
+		final String playerName = player.getName();
+		
 		Group storageGroup = findNextGroup(playerName);
 		final PexGroup nextGroup = storageGroup.getGroup();
 
 		long moveTime = storageGroup.getMoveTime() - mysqlConnector.getPlayTimeReal(playerName);
-		log.info(String.valueOf(mysqlConnector.getPlayTimeReal(playerName)));
-		log.info(playerName +" in "+ moveTime + " to "+ nextGroup.getName());
-
-		
 		if (moveTime <= 0){
+			player.sendMessage("§a§lDu bist einen Rang aufgestiegen!");
 			gpex.getPexMysql().setGroup(playerName, nextGroup);
-			scheduleMove(playerName);
+			gpex.handlePex(player);
+			player.playSound(player.getLocation(), Sound.WITHER_SPAWN, 1, 1);
+			scheduleMove(player);
 			return;
 		}
 		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
@@ -75,27 +76,21 @@ public class ItsYourTime extends JavaPlugin{
 				if (Bukkit.getServer().getPlayerExact(playerName) == null){
 					return;
 				}
+				player.sendMessage("§a§lDu bist einen Rang aufgestiegen!");
 				gpex.getPexMysql().setGroup(playerName, nextGroup);
-				scheduleMove(playerName);
+				gpex.handlePex(player);
+				player.playSound(player.getLocation(), Sound.WITHER_SPAWN, 1, 1);
+				scheduleMove(player);
 			}
 		}, moveTime*20L);	
 	}
 	
-	public void prt(Object obj){
-		log.info(obj.toString());
-	}
-	
 	public Group findNextGroup(String player){
-		long playedTime = mysqlConnector.getPlayTimeReal(player);
-		
-		//TODO FIX THIS SHIT HERE. DOSENT WORK AT ALL.
-		
-		List<Long> keys = new ArrayList<Long>(timeConfig.getMoveTimes().keySet());
-		
-		Long[] sorted = new Long[keys.size()];
-		
+		long playedTime = mysqlConnector.getPlayTimeReal(player);				
+		Long[] sorted = new Long[timeConfig.getMoveTimes().keySet().size()];
+			
 		int i = 0;
-		for (Long key : keys){
+		for (Long key : timeConfig.getMoveTimes().keySet()){
 			sorted[i] = key;
 			i++;
 		}
@@ -103,15 +98,11 @@ public class ItsYourTime extends JavaPlugin{
 		Arrays.sort(sorted);
 		
 		Group sGroup = null;
-		//SELCET 1 WHERE time is NEARST TO playedtime
 		
-		//1 2 3 4 5 6 7 8
-		
-		//3
 		int last = 0;
-		for (int j = 0; j < sorted.length; j++) {
+		for (int j = sorted.length-1; j > -1; j--) {
 			Long time = sorted[j];
-			if (time >= playedTime){	
+			if (time > playedTime){	
 				sGroup = new Group(timeConfig.getMoveTimes().get(time), time);
 			}
 			last = j;
@@ -125,43 +116,7 @@ public class ItsYourTime extends JavaPlugin{
 			long time = sorted[last+1];
 			sGroup = new Group(timeConfig.getMoveTimes().get(time), time);
 		}
-		
-		
-		prt(sGroup.getGroup());
-		prt(sGroup.getMoveTime());
-		
 		return sGroup;
-	/*	
-		for (Long time : timeConfig.getMoveTimes().keySet()){
-			prt(time);
-			prt(playedTime);
-			prt(last);
-			if (time <= playedTime){
-				prt("1. True");
-				//gorup is ok.
-				if (time > last || last == -1){
-					prt("2. True");
-					last = time;
-					group = timeConfig.getMoveTimes().get(time);
-					prt("High: "+group.getName());
-				}
-			}
-			prt("Curr;");
-			prt((group == null) ? "null" : group.getName());
-			prt("----------------------");
-		}
-		
-		prt(group.getName());
-		/*
-		long currTime = 0;
-		for (Long time : timeConfig.getMoveTimes().keySet()){
-			if (time >= playedTime && (time >= currTime || currTime == 0)){
-				
-				currTime = time;
-			}
-		}
-*/
-	//	return new Group(group, last);
 	}
 	
 		

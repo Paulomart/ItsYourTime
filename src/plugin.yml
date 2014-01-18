@@ -2,3 +2,7 @@ name: ItsYourTime
 version: ALPHA-2.1.6.02 FOR MC-1.7
 main: me.Paulomart.ItsYourTime.ItsYourTime
 depend: [GPex]
+permissions: 
+    ItsYourTime.ItsYourTime:
+        description: Let you dont be moved anymore.
+        default: OP

@@ -36,7 +36,7 @@ public class EventListener implements Listener{
 	public void onPlayerJoin(PlayerJoinEvent event){
 		String playerName = event.getPlayer().getName();
 		itsYourTime.getMysqlConnector().join(playerName);
-		itsYourTime.scheduleMove(playerName);
+		itsYourTime.scheduleMove(event.getPlayer());
 	}
 
 
